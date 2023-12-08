@@ -5,6 +5,7 @@ use clap::Parser;
 
 struct TimingStats {
     _times: Vec<u128>,
+    median: u128,
     average: u128,
     min: u128,
     max: u128,
@@ -35,10 +36,12 @@ fn main() -> Result<(), Error> {
         );
 
         if args.nanos {
+            println!("Median: {} ns", stats.median);
             println!("Average: {} ns", stats.average);
             println!("Min: {} ns", stats.min);
             println!("Max: {} ns", stats.max);
         } else {
+            println!("Median: {} μs", stats.median);
             println!("Average: {} μs", stats.average);
             println!("Min: {} μs", stats.min);
             println!("Max: {} μs", stats.max);
@@ -84,8 +87,7 @@ fn time_func(f: &dyn Fn(), repeats: u32, nanos: bool) -> TimingStats {
     for _ in 0..repeats {
         let start = std::time::Instant::now();
         f();
-        let end = std::time::Instant::now();
-        let duration = end.duration_since(start);
+        let duration = start.elapsed();
         let time = if nanos {
             duration.as_nanos()
         } else {
@@ -93,12 +95,15 @@ fn time_func(f: &dyn Fn(), repeats: u32, nanos: bool) -> TimingStats {
         };
         times.push(time);
     }
-    let min = *times.iter().min().unwrap();
-    let max = *times.iter().max().unwrap();
+    times.sort();
+    let min = times[0];
+    let max = times[times.len() - 1];
+    let median = times[times.len() / 2];
     let sum: u128 = times.iter().sum();
     let average = sum / (repeats as u128);
     TimingStats {
         _times: times,
+        median,
         average,
         min,
         max,
