@@ -4,7 +4,6 @@ use std::io::{BufRead, BufReader, Error};
 use clap::Parser;
 
 struct TimingStats {
-    _times: Vec<u128>,
     median: u128,
     average: u128,
     min: u128,
@@ -102,7 +101,6 @@ fn time_func(f: &dyn Fn(), repeats: u32, nanos: bool) -> TimingStats {
     let sum: u128 = times.iter().sum();
     let average = sum / (repeats as u128);
     TimingStats {
-        _times: times,
         median,
         average,
         min,
